@@ -6,55 +6,16 @@
 /*   By: gbrunet <guill@umebrunet.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:52:42 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/30 16:51:20 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/30 22:58:28 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "BitcoinExchange.hpp"
 #include <iostream>
+#include <iomanip>
 #include <fstream>
-#include <ctime>
 #include <cstdlib>
 #include "style.h"
-
-static bool isLeapYear(int year) {
-	return (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0));
-}
-
-static void getDateParts(std::string date, int &year, int &month, int &day) {
-	int end = date.find("-");
-	year = std::atoi(date.substr(0, end).c_str());
-	date.erase(date.begin(), date.begin() + end + 1);
-	end = date.find("-");
-	month = std::atoi(date.substr(0, end).c_str());
-	date.erase(date.begin(), date.begin() + end + 1);
-	end = date.find("-");
-	day = std::atoi(date.substr(0, end).c_str());
-}
-
-static long getEpochTime(std::string date) {
-	std::tm		tm;
-	std::time_t	t;
-	int			year;
-	int			month;
-	int			day;
-
-	getDateParts(date, year, month, day);
-	if (!strptime((date + " 12:00:00").c_str(), "%Y-%m-%d %H:%M:%S", &tm))
-		return (-1);
-	if (year != tm.tm_year + 1900 || month != tm.tm_mon + 1 || day != tm.tm_mday)
-		return (-1);
-	if (year > 3000 || year < 1900)
-		return (-1);
-	if (month  == 2 && isLeapYear(year) && day > 29)
-		return (-1);
-	else if (month == 2 && !isLeapYear(year) && day > 28)
-		return (-1);
-	if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30)
-		return (-1);
-	t = std::mktime(&tm);
-	return(t);
-}
 
 static int parseDbLine(std::string line, std::map<long, double> *db) {
 	long	epoch;
@@ -70,6 +31,77 @@ static int parseDbLine(std::string line, std::map<long, double> *db) {
 	return (1);
 }
 
+static double checkPrice(std::string str, int &err_code) {
+	int		point = 0;
+	int		i = 0;
+	double	price;
+
+	err_code = 0;
+	if (str[i] == '-' || str[i] == '+')
+		i++;
+	while (str[i]) {
+		if (std::isdigit(str[i]))
+			i++;
+		else if (str[i] == '.') {
+			if (point == 0) {
+				point = 1;
+				i++;
+			}
+			else {
+				err_code = 1;
+				break ;
+			}
+		} else {
+			err_code = 1;
+			break ;
+		}
+	}
+	if (err_code != 0)
+		return (0);
+	price = std::atof(str.c_str());
+	if (price < 0)
+		err_code = 2;
+	else if (price > 1000)
+		err_code = 3;
+	return (price);
+}
+
+void  BitcoinExchange::parseInputLine(std::string line) {
+	long						epoch;
+	std::map<int, std::string>	split;
+	static int					line_num = 1;
+	int							err_code;
+
+	line_num++;
+	split = split_trim(line, "|");
+	if (split.size() != 2 && (split.size() == 1 && split[0] != "")) {
+		this->printLineError(line_num);
+		return ;
+	}
+	if (split.size() == 1 && split[0] == "")
+		return ;
+	epoch = getEpochTime(split[0]);
+	checkPrice(split[1], err_code);
+	if (epoch == -1 && err_code != 0)
+		this->printLineDateBtcError(split[0], split[1], err_code);
+	else if (epoch == -1)
+		this->printLineDateError(split[0], split[1], 0);
+	else if (err_code != 0)
+		this->printLineBtcError(split[0], split[1], err_code);	
+	else {
+
+		std::map<long, double>::iterator low;
+		low = this->_db.lower_bound(epoch);
+    	if (low->first != epoch && low == this->_db.begin())
+			this->printLineDateError(split[0], split[1], 1);
+		else if (low->first != epoch){
+			low--;
+			this->printLine(split[0], split[1], low->first, low->second);
+		} else
+			this->printLine(split[0], split[1], low->first, low->second);
+	}
+}
+
 BitcoinExchange::BitcoinExchange(): _valid_db(false) {
 	std::ifstream	db_stream;
 	std::string		line;
@@ -77,7 +109,7 @@ BitcoinExchange::BitcoinExchange(): _valid_db(false) {
 	db_stream.open("assets/data.csv");
 	if (db_stream.good()) {
 		this->_valid_db = true;
-		for (std::string line; std::getline(db_stream, line) && this->_valid_db;) {
+		for (; std::getline(db_stream, line) && this->_valid_db;) {
 			if (line == "date,exchange_rate")
 				continue ;
 			if (!parseDbLine(line, &this->_db))
@@ -85,10 +117,6 @@ BitcoinExchange::BitcoinExchange(): _valid_db(false) {
 		}
 	}
 	db_stream.close();
-
-//	std::map<long, double>::iterator it;
-//	for (it = this->_db.begin(); it != this->_db.end(); it++)
-//		std::cout << it->first << ": " << it->second << std::endl;
 };
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange &cpy) {
@@ -104,4 +132,30 @@ BitcoinExchange	&BitcoinExchange::operator=(const BitcoinExchange &rhs) {
 
 bool	BitcoinExchange::isValidDb() {
 	return (this->_valid_db);
+}
+
+bool	BitcoinExchange::convert(const std::string input_db) {
+	std::ifstream				input_stream;
+	std::string					line;
+	std::map<int, std::string>	split;
+
+	input_stream.open(input_db.c_str());
+	if (!input_stream.good()) {
+		input_stream.close();
+		return (false);
+	}
+	std::getline(input_stream, line);
+	split = split_trim(line, "|");
+	if (!(split.size() == 2 && split[0] == "date" && split[1] == "value")) {
+		std::cerr << RED << BOLD << "Error: " << END_STYLE;
+		std::cerr << RED << "First line in input database is incorrect";
+		std::cerr << END_STYLE << std::endl;
+		return (false);
+	}
+	printTop();
+	for (; std::getline(input_stream, line);)
+		this->parseInputLine(line);
+	this->printBottom();
+	input_stream.close();
+	return (true);
 }

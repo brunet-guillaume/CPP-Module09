@@ -6,7 +6,7 @@
 #    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 14:06:15 by gbrunet           #+#    #+#              #
-#    Updated: 2024/03/30 13:59:40 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/03/30 22:57:49 by gbrunet          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,7 @@ SRC_DIR = sources/
 
 OBJ_DIR = objects/
 
-SRC = main BitcoinExchange
+SRC = main BitcoinExchange BitcoinExchange_print BitcoinExchange_utils
 
 SRC_FILES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC)))
 
