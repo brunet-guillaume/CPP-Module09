@@ -6,7 +6,7 @@
 /*   By: gbrunet <guill@umebrunet.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 04:54:51 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/31 09:59:06 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/31 17:11:44 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ class PmergeMe {
 		void			sortPairVector();
 		vec_pair_ui_ui	mergeSortPairVector(vec_pair_ui_ui vec);
 		void			prepareForBinarySearchVector();
-		void			binarySearchVector();
+		void			jacobGroupVector();
+		void			binarySearchVector(ui item, int x_max);
 
 	public:
 		PmergeMe();
