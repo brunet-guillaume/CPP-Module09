@@ -6,13 +6,14 @@
 /*   By: gbrunet <guill@umebrunet.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 23:14:42 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/31 01:35:34 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/31 01:57:11 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "RPN.hpp"
 #include "style.h"
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <cstdlib>
 
@@ -31,6 +32,8 @@ RPN::~RPN() {}
 
 RPN	&RPN::operator=(const RPN &rhs) {
 	this->_stack = rhs._stack;
+	this->_rpn = rhs._rpn;
+	this->_rpn_exp = rhs._rpn_exp;
 	return (*this);
 }
 
@@ -65,45 +68,50 @@ void	RPN::reverseStack() {
 	}
 }
 
-static std::string	itoa(int nb) {
+static std::string	dtoa(double nb) {
 	std::ostringstream	s;
+	std::string			str;
 
-	s << nb;
-	return (s.str());
+	s << std::setprecision(8) << std::fixed << nb;
+	str = s.str();
+	str = str.erase(str.find_last_not_of('0') + 1);
+	if (str[str.length() - 1] == '.')
+		str += "0";
+	return (str);
 }
 
-std::string	RPN::add(int a, int b) {
-	return (itoa(a + b));
+std::string	RPN::add(double a, double b) {
+	return (dtoa(a + b));
 }
 
-std::string	RPN::sub(int a, int b) {
-	return (itoa(a - b));
+std::string	RPN::sub(double a, double b) {
+	return (dtoa(a - b));
 }
 
-std::string	RPN::mult(int a, int b) {
-	return (itoa(a * b));
+std::string	RPN::mult(double a, double b) {
+	return (dtoa(a * b));
 }
 
-std::string	RPN::div(int a, int b) {
+std::string	RPN::div(double a, double b) {
 	if (b == 0)
 		throw RPN::DivByZeroException();
-	return (itoa(a / b));
+	return (dtoa(a / b));
 }
 
 void	RPN::calc() {
 	std::string	str;
 	char		sign[] = {'+', '-', '*', '/'};
-	int			a;
-	int			b;
+	double		a;
+	double		b;
 
 	this->reverseStack();
 	while (this->_rpn.size()) {
 		str = this->_rpn.top();
 		this->_rpn.pop();
 		if (isSign(str[0]) && this->_stack.size() >= 2) {
-			b = std::atoi(this->_stack.top().c_str());
+			b = std::atof(this->_stack.top().c_str());
 			this->_stack.pop();
-			a = std::atoi(this->_stack.top().c_str());
+			a = std::atof(this->_stack.top().c_str());
 			this->_stack.pop();
 			for (int i = 0; i < 4; i++) {
 				if (str[0] == sign[i])

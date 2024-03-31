@@ -6,7 +6,7 @@
 /*   By: gbrunet <guill@umebrunet.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 23:11:54 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/31 01:34:21 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/31 01:49:07 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 class RPN {
 	private:
-		typedef std::string (RPN::*func)(int, int);
+		typedef std::string (RPN::*func)(double, double);
 
 		std::stack<std::string>	_stack;
 		std::stack<std::string>	_rpn;
@@ -26,10 +26,10 @@ class RPN {
 		std::string				_rpn_exp;
 
 		void	reverseStack();
-		std::string	add(int a, int b);
-		std::string	sub(int a, int b);
-		std::string	mult(int a, int b);
-		std::string	div(int a, int b);
+		std::string	add(double a, double b);
+		std::string	sub(double a, double b);
+		std::string	mult(double a, double b);
+		std::string	div(double a, double b);
 
 	public:
 		RPN();
