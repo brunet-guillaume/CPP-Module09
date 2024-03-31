@@ -6,7 +6,7 @@
 /*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:20:01 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/31 06:05:26 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/31 20:23:20 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,12 @@
 #include "PmergeMe.hpp"
 #include <iostream>
 #include <vector>
+#include <list>
+#include <set>
 #include <cstdlib>
+#include <sys/time.h>
+#include <iomanip>
+#include <sstream>
 
 static void	ltrim(std::string &s) {
 	int	i = 0;
@@ -65,16 +70,81 @@ static bool	isUnsInt(std::string str) {
 }
 
 static bool	hasDuplicates(vec_ui &vec) {
-	vec_ui::iterator it1;
-	vec_ui::iterator it2;
+	std::set<ui> s(vec.begin(), vec.end());
 
-	for (it1 = vec.begin(); it1 != vec.end() - 1; it1++) {
-		for (it2 = it1 + 1; it2 != vec.end(); it2++) {
-			if (*it1 == *it2)
-				return (true);
-		}
-	}
-	return (false);
+	return (s.size() != vec.size());
+}
+
+static std::string	dtoa(double nb) {
+	std::ostringstream	s;
+	std::string			str;
+
+	s << std::setprecision(3) << std::fixed << nb;
+	str = s.str();
+	str = str.erase(str.find_last_not_of('0') + 1);
+	if (str[str.length() - 1] == '.')
+		str += "0";
+	return (str);
+}
+
+static void	printEntries(vec_ui &vec, ui maxLen) {
+	ui	size = vec.size();
+
+	for (unsigned int i = 0; i < size && i < maxLen; i++) {
+		std::cout << vec[i] << " ";
+    }
+	if (size > maxLen)
+		std::cout << "[...]";
+}
+
+static unsigned long  getTime()
+{
+	struct timeval	time;
+
+	gettimeofday (&time, NULL);
+	return (time.tv_usec + time.tv_sec * 1000000);
+}
+
+
+static void sort(PmergeMe &pmm, vec_ui &entries) {
+	unsigned long vecIn, vecOut;
+	unsigned long listIn, listOut;
+
+	std::cout << THIN "<vector>... " END_STYLE << std::endl;
+	vecIn = getTime();
+	pmm.sortVector(entries);
+	vecOut = getTime();
+	std::cout << "Done." END_STYLE << std::endl;
+
+	std::cout << THIN "<list>... " END_STYLE << std::endl;
+	listIn = getTime();
+	pmm.sortList(entries);
+	listOut = getTime();
+	std::cout << "Done. \n\n" END_STYLE << std::endl;
+
+	std::cout << YELLOW "Before : " BOLD;
+	printEntries(entries, 20);
+	std::cout << "\n\n" END_STYLE;
+
+	std::cout << CYAN "Container : " BOLD "<vector> :\n" END_STYLE;
+	std::cout << GREEN " After : " BOLD;
+	pmm.printVector(20);
+	std::cout << "\n" END_STYLE;
+	std::cout << PURPLE "  Time to process a range of " BOLD << entries.size();
+	std::cout << END_STYLE PURPLE " elements: " BOLD RED << vecOut - vecIn;
+	std::cout << " µs " END_STYLE RED "(";
+	std::cout << dtoa(static_cast<double>(vecOut - vecIn) / 1000000.0) << " s)\n\n";
+	std::cout << END_STYLE;
+
+	std::cout << CYAN "Container : " BOLD "<list> :\n" END_STYLE;
+	std::cout << GREEN " After : " BOLD;
+	pmm.printList(20);
+	std::cout << "\n" END_STYLE;
+	std::cout << PURPLE "  Time to process a range of " BOLD << entries.size();
+	std::cout << END_STYLE PURPLE " elements: " BOLD RED << listOut - listIn;
+	std::cout << " µs " END_STYLE RED "(";
+	std::cout << dtoa(static_cast<double>(listOut - listIn) / 1000000.0) << " s)\n";
+	std::cout << END_STYLE;
 }
 
 int	main(int ac, char **av) {
@@ -89,21 +159,23 @@ int	main(int ac, char **av) {
 		std::cerr << END_STYLE << std::endl;
 		return (1);
 	}
+	std::cout << CYAN BOLD "\nVerifying the input array..." END_STYLE << std::endl;
 	while (av[++i]) {
 		if (!isUnsInt(av[i])) {
-			std::cerr << RED BOLD "Error: " END_STYLE;
-			std::cerr << RED << av[i] << " is not an unsigned integer";
+			std::cerr << RED " ❌ " << av[i] << " is not an unsigned integer";
 			std::cerr << END_STYLE << std::endl;
 			return (1);
 		}
 		entries.push_back(std::atol(av[i]));
 	}
+	std::cout << GREEN " ✅  All arguments are unsigned long" END_STYLE << std::endl;
+	std::cout << CYAN BOLD "\nChecking for duplicates..." END_STYLE << std::endl;
 	if (hasDuplicates(entries)) {
-		std::cerr << RED BOLD "Error: " END_STYLE;
-		std::cerr << RED "There are some duplicates" END_STYLE << std::endl;
+		std::cerr << RED " ❌ There are some duplicates" END_STYLE << std::endl;
 		return (1);
 	}
-	pmm.sortVector(entries);
-
+	std::cout << GREEN " ✅  No duplicates" END_STYLE << std::endl;
+	std::cout << CYAN BOLD "\nStarting sortings..." END_STYLE << std::endl;
+	sort(pmm, entries);
 	return (0);
 }
