@@ -6,7 +6,7 @@
 /*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/23 15:20:01 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/31 05:33:19 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/31 06:05:26 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,9 @@ static bool	isUnsInt(std::string str) {
 	return (!unsIntOverflow(str));
 }
 
-static bool	hasDuplicates(std::vector<unsigned int> &vec) {
-	std::vector<unsigned int>::iterator it1;
-	std::vector<unsigned int>::iterator it2;
+static bool	hasDuplicates(vec_ui &vec) {
+	vec_ui::iterator it1;
+	vec_ui::iterator it2;
 
 	for (it1 = vec.begin(); it1 != vec.end() - 1; it1++) {
 		for (it2 = it1 + 1; it2 != vec.end(); it2++) {
@@ -78,8 +78,8 @@ static bool	hasDuplicates(std::vector<unsigned int> &vec) {
 }
 
 int	main(int ac, char **av) {
-	PmergeMe					pmm;
-	std::vector<unsigned int>	entries;
+	PmergeMe	pmm;
+	vec_ui		entries;
 	int							i = 0;
 
 	if (ac == 1) {

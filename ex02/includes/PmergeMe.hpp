@@ -6,7 +6,7 @@
 /*   By: gbrunet <guill@umebrunet.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 04:54:51 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/31 05:34:46 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/31 06:11:23 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,17 @@
 
 # include <vector>
 
+typedef unsigned int ui;
+typedef std::pair<ui, ui> pair_ui_ui;
+typedef std::vector<unsigned int> vec_ui;
+typedef std::vector<pair_ui_ui> vec_pair_ui_ui;
+
 class PmergeMe {
 	private:
-		std::vector<unsigned int>	_vector;
+		vec_ui					_vector;
+		std::vector<pair_ui_ui>	_pairVector;
+
+		void	sortPairVector();
 
 	public:
 		PmergeMe();
@@ -26,7 +34,7 @@ class PmergeMe {
 
 		PmergeMe	&operator=(const PmergeMe &rhs);
 
-		void	sortVector(const std::vector<unsigned int> &vec);
+		void	sortVector(const vec_ui &vec);
 };
 
 #endif
