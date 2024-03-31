@@ -6,7 +6,7 @@
 /*   By: gbrunet <guill@umebrunet.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/31 04:54:51 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/31 06:11:23 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/31 09:59:06 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,12 @@ class PmergeMe {
 	private:
 		vec_ui					_vector;
 		std::vector<pair_ui_ui>	_pairVector;
+		vec_ui					_pendVector;
 
-		void	sortPairVector();
+		void			sortPairVector();
+		vec_pair_ui_ui	mergeSortPairVector(vec_pair_ui_ui vec);
+		void			prepareForBinarySearchVector();
+		void			binarySearchVector();
 
 	public:
 		PmergeMe();
