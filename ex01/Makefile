@@ -6,7 +6,7 @@
 #    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 14:06:15 by gbrunet           #+#    #+#              #
-#    Updated: 2024/03/30 23:16:48 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/04/01 18:41:54 by gbrunet          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,26 +50,39 @@ all : $(NAME)
 
 $(OBJ_DIR)%.o : $(SRC_DIR)%.cpp
 	$(eval COMPTEUR=$(shell echo $$(($(COMPTEUR)+1))))
+	@printf "\e[?25l"
 	@mkdir -p $(@D)
-	@printf "$(_CYAN)Binary $(COMPTEUR): $@$(_END)\n"
-	$(CC) -c $(CFLAGS) $< -o $@
+	@if test $(COMPTEUR) -eq 1;then \
+		printf "$(_YELLOW)Compiling $(NAME) binary files...$(_END)\n\n";fi
+	@printf "\033[A\33[2K\r$(_CYAN)Binary $(COMPTEUR): $@$(_END)\n"
+	@$(CC) -c $(CFLAGS) $< -o $@
 
 $(NAME) : $(OBJ_FILES)
-	$(CC) $(OBJ_FILES) -o $(NAME)
+	@make info --no-print-directory
+	@$(CC) $(OBJ_FILES) -o $(NAME)
 	@echo "$(_GREEN)$(NAME) created.$(_END)"
+	@printf "\e[?25h"
 
 clean :
 	@echo "$(_YELLOW)$(NAME): Clean...$(_END)"
-	$(RM) -rf $(OBJ_DIR)
+	@$(RM) -rf $(OBJ_DIR)
 	@echo "$(_GREEN)$(NAME): Binaries deleted.$(_END)"
 
 fclean :
 	@echo "$(_YELLOW)$(NAME): Full clean...$(_END)"
-	$(RM) -rf $(OBJ_DIR)
+	@$(RM) -rf $(OBJ_DIR)
 	@echo "$(_GREEN)$(NAME): Binaries deleted.$(_END)"
-	$(RM) $(NAME)
+	@$(RM) $(NAME)
 	@echo "$(_GREEN)$(NAME) deleted.$(_END)"
 
 re :
 	@make fclean --no-print-directory
 	@make all --no-print-directory
+
+info :
+	@printf "\t$(_PURPLE)╭──────────────────────────────────────╮"
+	@printf "\n\t│$(_END)  👾  $(_CYAN)$(_THIN)Coded by $(_END)$(_CYAN)"
+	@printf "$(_BOLD)guillaume brunet$(_END)$(_PURPLE)       │\n"
+	@printf "\t│$(_END)  💬  $(_RED)$(_BOLD)Do not copy$(_END)$(_RED)$(_THIN), "
+	@printf "$(_END)$(_RED)this is useless...$(_END) $(_PURPLE)│\n"
+	@printf "\t╰──────────────────────────────────────╯\n$(_END)"
